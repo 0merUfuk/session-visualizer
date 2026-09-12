@@ -515,7 +515,7 @@ def parser() -> argparse.ArgumentParser:
     retention.add_argument("--confirm", action="store_true")
     sub.add_parser(
         "mcp",
-        help="Read-only MCP tool server over stdio (spawned by agent hosts; no network)",
+        help="MCP tool server for agents over stdio: queries + setup/refresh (no network)",
     )
     ui = sub.add_parser("ui", help="Read-only local dashboard on loopback (opt-in)")
     ui.add_argument(
