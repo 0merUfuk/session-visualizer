@@ -39,8 +39,9 @@ well-designed tool layer that extends it.
 - **Agent-first design.** New capabilities are designed as agent-usable first
   (MCP tool, structured I/O, described in agent idioms); human CLI and
   dashboard views follow. If an agent cannot do it, the flow is incomplete.
-- **Natural language is the only human interface.** "Set up Rifja and import
-  my Codex sessions" spoken to the agent must be sufficient. Wizard screens
+- **Natural language is the primary human interface.** "Set up Rifja and
+  import my Codex sessions" spoken to the agent must be sufficient. The
+  dashboard is the human's management surface; direct CLI and wizard screens
   exist for humans who want them, never as the required path.
 - **The operator's authority is never delegated to the agent.** Agents may
   propose memory (`inferred`/`proposed`), never accept it. Destructive
