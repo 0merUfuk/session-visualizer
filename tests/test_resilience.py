@@ -434,7 +434,7 @@ def test_v2_upgrade_backup_restore_and_failed_index_migration(tmp_path: Path) ->
         db.execute("PRAGMA user_version=2")
     with Store(home) as migrated:
         assert migrated.config("sentinel") == "preserve-me"
-        assert migrated.db.execute("PRAGMA user_version").fetchone()[0] == 3
+        assert migrated.db.execute("PRAGMA user_version").fetchone()[0] == SCHEMA_VERSION
     backup = home / "before-migration-v2.sqlite3"
     with sqlite3.connect(backup) as db:
         assert db.execute("PRAGMA user_version").fetchone()[0] == 2
@@ -442,7 +442,7 @@ def test_v2_upgrade_backup_restore_and_failed_index_migration(tmp_path: Path) ->
     restore(backup, restored_home)
     with Store(restored_home) as restored:
         assert restored.config("sentinel") == "preserve-me"
-        assert restored.db.execute("PRAGMA user_version").fetchone()[0] == 3
+        assert restored.db.execute("PRAGMA user_version").fetchone()[0] == SCHEMA_VERSION
 
     failing = tmp_path / "failing-v2"
     create_v1(failing)

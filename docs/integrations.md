@@ -1,7 +1,8 @@
 # Agent ecosystem integrations
 
-Rifja integrates with coding agents through one read-only query surface — the
-MCP stdio server — plus small per-platform pointers and hooks. Every surface
+Rifja integrates with coding agents through one surface — the MCP stdio
+server carrying the operational and query tools agents need — plus small
+per-platform pointers and hooks. Every surface
 is a thin adapter over the same `App` service layer the CLI uses; there is no
 per-platform business logic and no second implementation to drift.
 
@@ -16,7 +17,7 @@ Two boundaries hold everywhere:
   hook timeout, bounds its own output with `head -c`, and fails open (no
   output, exit 0) when Rifja is missing, slow or erroring.
 
-## MCP server (shared query surface)
+## MCP server (the agent surface)
 
 ```sh
 rifja mcp
@@ -28,14 +29,28 @@ port: whoever can spawn the process already holds the operator's local
 authority, so the "no unauthenticated network endpoint" property of the
 [threat model](rifja-threat-model.md) holds by construction.
 
-Read-only tools, all served through the same bounded render paths as the CLI:
+Agent-facing tools, all served through the same bounded render paths as the
+CLI and all recorded in the activity log:
 
-| Tool | Answers | Provenance |
+| Tool | Answers | Notes |
 | --- | --- | --- |
-| `search` | Literal full-text search over imported evidence | record IDs, provider/actor, event time, source status |
-| `resume` | Bounded continuation context for a project (cached Git observations) | evidence references, trust notice, omission counts |
-| `explain` | Where one record came from and whether it is still current | provider, session, timestamps, per-location generation status |
-| `memory` | Operator-accepted local memory entries | entry IDs, scopes, origins (never raw transcript text) |
+| `status` | Tool state in one call (coverage, counts, schema) | deterministic; call first |
+| `setup` | Initialize/repair configuration | idempotent |
+| `register_source` | Register one explicit transcript store | nothing read until refresh |
+| `register_project` | Register an explicit repository path | discovers linked worktrees |
+| `refresh` | Incrementally import configured sources | offline; full report returned |
+| `projects` | Registered projects + worktrees | |
+| `search` | Literal full-text search over imported evidence | record IDs, provenance |
+| `resume` | Bounded continuation context (cached Git observations) | evidence references, trust notice |
+| `tasks` | Unfinished work, prioritized for continuation | framed untrusted evidence |
+| `daily` | Per-day record counts + one-day drill-down | aggregate-first, fast |
+| `explain` | Where one record came from; still current? | per-location generation status |
+| `memory` | Operator-accepted local memory | never raw transcript text |
+| `remember` | PROPOSE a memory entry | starts `proposed`; acceptance is human-only |
+| `associate` | Attach record/session to a project | explicit reason required |
+
+Destructive operations (`forget`, `retention`, `backup`, `restore`) are
+deliberately not exposed to agents; the operator runs them in the terminal.
 
 Writer contention (a concurrent `refresh`) never blocks these tools — reads
 do not take the writer lock — and any per-request failure is returned as an
